@@ -1,0 +1,20 @@
+[
+  {
+    "id": "618e6bbe-0b05-4467-8b10-a356b42a1954",
+    "title": "Teclado Rojo",
+    "description": "Teclado Inalambrico",
+    "stock": 3,
+    "code": "12234FR3",
+    "price": 340500,
+    "thumbnail": ""
+  },
+  {
+    "id": "adaf0996-fd97-473f-b257-1ee8e94dfe94",
+    "title": "Auriculares JBL",
+    "description": "Auriculares inalambricos",
+    "stock": 10,
+    "code": "12234FR4",
+    "price": 500000,
+    "thumbnail": ""
+  }
+]
