@@ -1,55 +1,39 @@
 import express from "express";
-import http from "http";
-import { Server } from "socket.io";
+import productsRouter from "./routes/products.router.js";
+import connectMongoDB from "./config/db.js";
+import dotenv from "dotenv";
+import __dirname from "../dirname.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
+import cartsRouter from "./routes/carts.router.js";
 import { engine } from "express-handlebars";
 import viewsRouter from "./routes/views.router.js";
-import productsRouter from "./routes/products.router.js";
-import ProductManager from "./productManager.js";
-import CartManager from "./cartManager.js";
+
+//inicializar variables de entorno
+dotenv.config({path: __dirname + "/.env"});
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + "/public"));
+const PORT = process.env.PORT || 8080;
 
+connectMongoDB();
 
-//handlebars config
+//handlebars
 app.engine( "handlebars", engine() );
 app.set("view engine", "handlebars");
-app.set("views", "./src/views");
+app.set("views", __dirname + "/src/views");
 
 //endpoints
 
-app.get("/dashboard", (req, res) => {
-  res.render("dashboard");
-});
-
-// habilita poder recibir data en formato json
-app.use(express.json());
-app.use(express.static("./src/public"));
-const productManager = new ProductManager("./src/products.json");
-const cartManager = new CartManager("./src/carts.json");
-
-//routes 
-
-app.use("/", viewsRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
+app.use("/", viewsRouter);
 
-io.on("connection", async (socket) => {
-  console.log("Cliente conectado");
+app.use(errorHandler);
 
-  socket.emit("products", await productManager.getProducts());
 
-  socket.on("addProduct", async (product) => {
-    await productManager.addProduct(product);
-    io.emit("products", await productManager.getProducts());
-  });
 
-  socket.on("deleteProduct", async (pid) => {
-    await productManager.deleteProductById(pid);
-    io.emit("products", await productManager.getProducts());
-  });
-});
-
-server.listen(8080, () => {
-  console.log("Servidor iniciado en el puerto 8080");
+app.listen(PORT,() => {
+  console.log("servidor iniciado correctamente");
 });
