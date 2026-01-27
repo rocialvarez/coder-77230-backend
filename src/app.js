@@ -7,6 +7,10 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 import cartsRouter from "./routes/carts.router.js";
 import { engine } from "express-handlebars";
 import viewsRouter from "./routes/views.router.js";
+import passport from "passport";
+import { initPassport } from "./config/passport.config.js";
+import sessionsRouter from "./routes/sessions.router.js";
+
 
 //inicializar variables de entorno
 dotenv.config({path: __dirname + "/.env"});
@@ -19,6 +23,10 @@ const PORT = process.env.PORT || 8080;
 
 connectMongoDB();
 
+initPassport();
+app.use(passport.initialize());
+
+
 //handlebars
 app.engine( "handlebars", engine() );
 app.set("view engine", "handlebars");
@@ -26,6 +34,7 @@ app.set("views", __dirname + "/src/views");
 
 //endpoints
 
+app.use("/api/sessions", sessionsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/", viewsRouter);
