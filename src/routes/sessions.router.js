@@ -1,4 +1,5 @@
 import express from "express";
+import passport from "passport";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import Cart from "../models/cart.model.js";
@@ -43,15 +44,23 @@ router.post("/register", async (req, res, next) => {
 
 router.post(
   "/login",
-  passportCall("login"),
+  passport.authenticate("login", { session: false }),
   (req, res) => {
     const user = req.user;
 
-    const token = jwt.sign(
-      user.toObject(),
-      "CoderCoder123",
-      { expiresIn: "1h" }
-    );
+    const userDTO = {
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      age: user.age,
+      role: user.role,
+      cart: user.cart
+    };
+
+    const token = jwt.sign(userDTO, process.env.JWT_SECRET, {
+      expiresIn: "1h"
+    });
 
     res.json({
       status: "success",
@@ -59,6 +68,7 @@ router.post(
     });
   }
 );
+
 
 
 router.get(
