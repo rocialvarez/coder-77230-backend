@@ -1,14 +1,9 @@
-import Product from "../models/product.model.js";
+import { productService } from "../services/index.js";
 import { throwHttpError } from "../utils/httpError.js";
 
-export const getAllProducts = async (req,res,next) => {
+export const getAllProducts = async (req, res, next) => {
   try {
-    const {
-      limit = 10,
-      page = 1,
-      sort,
-      query
-    } = req.query;
+    const { limit = 10, page = 1, sort, query } = req.query;
 
     const filter = {};
     if (query) {
@@ -29,7 +24,7 @@ export const getAllProducts = async (req,res,next) => {
       options.sort = { price: sort === "asc" ? 1 : -1 };
     }
 
-    const result = await Product.paginate(filter, options);
+    const result = await productService.getProducts(filter, options);
 
     const {
       docs,
@@ -48,55 +43,57 @@ export const getAllProducts = async (req,res,next) => {
       nextPage,
       page: Number(page),
       hasPrevPage,
-      hasNextPage,
-      prevLink: hasPrevPage
-        ? `/api/products?limit=${limit}&page=${prevPage}`
-        : null,
-      nextLink: hasNextPage
-        ? `/api/products?limit=${limit}&page=${nextPage}`
-        : null
+      hasNextPage
     });
+
   } catch (error) {
     next(error);
   }
 };
 
-
-export const addProduct = async (req,res,next) => {
+export const addProduct = async (req, res, next) => {
   try {
-    const newProduct = await Product.create(req.body);
+    const newProduct = await productService.createProduct(req.body);
 
-    res.status(201).json({status: "success", payload: newProduct});
+    res.status(201).json({
+      status: "success",
+      payload: newProduct
+    });
+
   } catch (error) {
     next(error);
   }
 };
 
-export const setProductById = async (req,res,next) => {
+export const setProductById = async (req, res, next) => {
   try {
-    const pid = req.params.pid;
-    const updateData = req.body;
+    const updatedProduct = await productService.updateProduct(
+      req.params.pid,
+      req.body
+    );
 
-    const updatedProduct = await Product.findByIdAndUpdate(pid, updateData, { new: true, runValidators: true });
+    res.status(200).json({
+      status: "success",
+      payload: updatedProduct
+    });
 
-    if(!updatedProduct) throwHttpError("Producto no encontrado", 404);
-
-    res.status(200).json({status: "success", payload: updatedProduct});
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
-export const deleteProductById = async (req,res,next) => {
+export const deleteProductById = async (req, res, next) => {
   try {
-    const pid = req.params.pid;
+    const deletedProduct = await productService.deleteProduct(
+      req.params.pid
+    );
 
-    const deletedProduct = await Product.findByIdAndDelete(pid);
+    res.status(200).json({
+      status: "success",
+      payload: deletedProduct
+    });
 
-    if (!deletedProduct) throwHttpError("Producto no encontrado", 404)
-
-    res.status(200).json({status: "success", payload: deletedProduct});
   } catch (error) {
-    next(error)
+    next(error);
   }
 };

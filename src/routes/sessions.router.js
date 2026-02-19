@@ -5,6 +5,7 @@ import User from "../models/user.model.js";
 import Cart from "../models/cart.model.js";
 import { createHash } from "../utils/bcrypt.js";
 import { passportCall } from "../utils/passportCall.js";
+import { requestPasswordReset, resetPassword, current } from "../controllers/sessions.controller.js";
 
 const router = express.Router();
 
@@ -71,15 +72,9 @@ router.post(
 
 
 
-router.get(
-  "/current",
-  passportCall("current"),
-  (req, res) => {
-    res.json({
-      status: "success",
-      payload: req.user
-    });
-  }
-);
+router.get("/current", passportCall("current"), current);
+
+router.post("/forgot-password", requestPasswordReset);
+router.post("/reset-password/:token", resetPassword);
 
 export default router;

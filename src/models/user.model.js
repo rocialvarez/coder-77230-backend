@@ -21,13 +21,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+
+  resetPasswordToken: {
+  type: String
+  },
+
   cart: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Cart"
   },
+
   role: {
-    type: String,
-    default: "user"
+  type: String,
+  enum: ["user", "admin"],
+  default: "user"
   }
 });
 
